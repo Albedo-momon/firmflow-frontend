@@ -14,14 +14,51 @@ interface UploadResponse {
   status: string;
 }
 
+interface Party {
+  name: string;
+  role: string;
+  contact?: {
+    email?: string;
+    phone?: string;
+  };
+}
+
+interface ContractDetails {
+  effective_date?: string;
+  expiration_date?: string;
+  contract_type?: string;
+  value?: string | number;
+}
+
+interface ScopeOfWork {
+  deliverables?: string[];
+  timeline?: string;
+}
+
+interface ConfidenceScores {
+  overall_accuracy?: number;
+  field_confidence?: Record<string, number>;
+}
+
+interface ExtractionData {
+  parties?: Party[];
+  contract_details?: ContractDetails;
+  key_obligations?: string[];
+  scope_of_work?: ScopeOfWork;
+  summary?: string;
+  extraction_timestamp?: string;
+  confidence_scores?: ConfidenceScores;
+  [key: string]: unknown; // For any additional fields
+}
+
 interface StatusResponse {
   jobId: string;
   status: string;
-  extraction?: any; // Raw extraction data from backend
+  extraction?: ExtractionData;
   requires_review?: boolean;
   result?: {
     summary: string;
-    keyFields: Record<string, any>;
+    keyFields: Record<string, unknown>;
   };
 }
 
@@ -33,8 +70,8 @@ export default function DemoUploadPage() {
   const [extractionResult, setExtractionResult] = useState<
     StatusResponse['result'] | null
   >(null);
-  const [rawExtraction, setRawExtraction] = useState<any>(null);
-  const [parsedExtraction, setParsedExtraction] = useState<any>(null);
+  const [rawExtraction, setRawExtraction] = useState<ExtractionData | null>(null);
+  const [parsedExtraction, setParsedExtraction] = useState<ExtractionData | null>(null);
   const [parseError, setParseError] = useState(false);
   const [showRawJson, setShowRawJson] = useState(false);
   const [requiresReview, setRequiresReview] = useState(false);
@@ -107,7 +144,8 @@ export default function DemoUploadPage() {
 
       // Start polling for status
       startPolling(data.jobId);
-    } catch (err) {
+    } catch (error) {
+      console.error('Upload error:', error);
       setError('Upload failed. Please try again.');
       setIsUploading(false);
     }
@@ -255,7 +293,8 @@ export default function DemoUploadPage() {
       } else {
         throw new Error('Zapier webhook failed');
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Zapier webhook error:', error);
       setError('Failed to send to Zapier');
     }
   };
@@ -425,7 +464,7 @@ export default function DemoUploadPage() {
                   <div>
                     <h4 className="font-medium text-gray-900 mb-3">Parties</h4>
                     <div className="space-y-3">
-                      {parsedExtraction.parties.slice(0, 5).map((party: any, index: number) => (
+                      {parsedExtraction.parties.slice(0, 5).map((party: Party, index: number) => (
                         <div key={index} className="p-3 bg-gray-50 rounded-md">
                           <div className="flex justify-between items-start mb-1">
                             <span className="font-medium text-gray-900">{party.name}</span>
@@ -452,7 +491,7 @@ export default function DemoUploadPage() {
                     <ul className="space-y-2">
                       {(parsedExtraction.key_obligations || parsedExtraction.scope_of_work?.deliverables || [])
                         .slice(0, 5)
-                        .map((obligation: any, index: number) => (
+                        .map((obligation: string | { summary?: string; description?: string }, index: number) => (
                           <li key={index} className="flex items-start">
                             <span className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
                             <span className="text-sm text-gray-600">
