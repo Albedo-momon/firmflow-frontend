@@ -41,14 +41,10 @@ npm install
 
 3. Set up environment variables:
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env.local
 ```
 
-Edit `.env.local` with your configuration:
-```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
-NEXT_PUBLIC_ZAPIER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/your-webhook-id/
-```
+Edit `.env.local` with your configuration. See [Configuration](#configuration) section for details.
 
 4. Run the development server:
 ```bash
@@ -56,6 +52,58 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+## Configuration
+
+FirmFlow uses a flexible configuration system that allows switching environments without code changes. Configuration is managed through:
+
+- **Config files**: Default values and environment-specific overrides
+- **Environment variables**: Runtime configuration with `NEXT_PUBLIC_*` prefix
+- **Hierarchical merging**: Environment variables override config files
+
+### Quick Setup
+
+1. Copy the environment template:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Edit `.env.local` with your values:
+   ```bash
+   NEXT_PUBLIC_ENV=development
+   NEXT_PUBLIC_API_BASE=http://localhost:4000
+   NEXT_PUBLIC_LLM_PROVIDER=mock
+   ```
+
+3. Restart the development server:
+   ```bash
+   npm run dev
+   ```
+
+### Key Configuration Options
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_ENV` | Environment (development/production/staging) | `development` |
+| `NEXT_PUBLIC_API_BASE` | Backend API URL | `http://localhost:4000` |
+| `NEXT_PUBLIC_LLM_PROVIDER` | LLM provider (mock/anthropic/openai) | `mock` |
+| `NEXT_PUBLIC_ENABLE_DEV_MODE` | Enable development features | `true` |
+
+### Usage in Components
+
+```javascript
+import { config } from '@/config';
+
+// Use configuration values
+const apiUrl = `${config.apiBase}/api/documents`;
+const isDevMode = config.enableDevMode;
+```
+
+### Debug Configuration
+
+Visit `/debug-config` during development to view the current configuration and verify your settings.
+
+For complete documentation, see [`config/README.md`](./config/README.md).
 
 ## Available Scripts
 
