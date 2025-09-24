@@ -9,6 +9,10 @@ import {
   CardTitle,
 } from '@/components/ui';
 
+// Import the config system
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { getConfig } = require('../../../config');
+
 interface UploadResponse {
   jobId: string;
   status: string;
@@ -126,10 +130,11 @@ export default function DemoUploadPage() {
     setError(null);
 
     try {
+      const config = getConfig();
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      const response = await fetch('http://localhost:4000/api/upload', {
+      const response = await fetch(`${config.apiBase}/api/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -170,8 +175,9 @@ export default function DemoUploadPage() {
 
     pollingIntervalRef.current = setInterval(async () => {
       try {
+        const config = getConfig();
         const response = await fetch(
-          `http://localhost:4000/api/status/${jobId}`
+          `${config.apiBase}/api/status/${jobId}`
         );
         if (!response.ok) {
           throw new Error('Status check failed');
@@ -279,7 +285,8 @@ export default function DemoUploadPage() {
     if (!extractionResult) return;
 
     try {
-      const response = await fetch('http://localhost:4000/webhook/automation', {
+      const config = getConfig();
+      const response = await fetch(`${config.apiBase}/webhook/automation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
